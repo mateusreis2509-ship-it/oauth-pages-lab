@@ -207,6 +207,9 @@ async function handleGoogleCallback(
     });
 
     if (!response.ok) {
+         const errorBody = await response.text();
+
+
         throw new Error(`Google token exchange failed: ${response.status}`);
     }
 
