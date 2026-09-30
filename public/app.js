@@ -1,12 +1,29 @@
-fetch('/api/me')
-    .then(res => res.json())
-    .then(data => {
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-            statusEl.textContent = "COOKIE: " + data.cookieRecebido + " | BANCO D1: " + data.temBancoD1;
+async function loadSession() {
+    const statusEl = document.getElementById("status");
+
+    if (!statusEl) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/me", {
+            headers: {
+                Accept: "application/json"
+            },
+            cache: "no-store"
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.authenticated) {
+            statusEl.textContent = "Não autenticado";
+            return;
         }
-    })
-    .catch(err => {
-        const statusEl = document.getElementById('status');
-        if (statusEl) statusEl.textContent = "Erro ao carregar: " + err;
-    });
+
+        const user = data.user;
+        statusEl.textContent = user?.displayName || user?.email || "Autenticado";
+    } catch {
+        statusEl.textContent = "Não foi possível verificar a sessão";
+    }
+}
+
+loadSession();

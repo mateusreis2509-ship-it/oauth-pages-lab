@@ -8,7 +8,7 @@ export async function onRequestGet(context) {
 
     if (!sessionCookie) {
         return Response.json(
-            { authenticated: false },
+            { authenticated: false, user: null },
             {
                 status: 401,
                 headers: {
@@ -28,8 +28,7 @@ export async function onRequestGet(context) {
                 issuer,
                 subject,
                 email,
-                display_name,
-                expires_at
+                display_name
             FROM sessions
             WHERE id_hash = ?
               AND expires_at > ?
@@ -39,7 +38,7 @@ export async function onRequestGet(context) {
 
     if (!session) {
         return Response.json(
-            { authenticated: false },
+            { authenticated: false, user: null },
             {
                 status: 401,
                 headers: {
