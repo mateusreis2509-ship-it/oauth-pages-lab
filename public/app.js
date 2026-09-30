@@ -1,4 +1,4 @@
-JavaScript
+
 fetch('/api/me', {
     credentials: "same-origin"
 })
