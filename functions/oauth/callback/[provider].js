@@ -25,23 +25,7 @@ export async function onRequestGet(context) {
     const { request, env, params } = context;
     const provider = params.provider;
 
-    if (provider === "google") {
-    try {
-        identity = await handleGoogleCallback(
-            code,
-            transaction.code_verifier,
-            transaction.nonce,
-            config
-        );
-    } catch (error) {
-        return new Response(`Google OAuth callback failed: ${error.message}`, {
-            status: 500,
-            headers: {
-                "Cache-Control": "no-store"
-            }
-        });
-    }
-}
+   
 
     const url = new URL(request.url);
 
