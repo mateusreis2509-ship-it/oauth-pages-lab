@@ -104,21 +104,28 @@ export async function onRequestGet(context) {
 
     let identity;
 
-    if (provider === "google") {
-        identity = await handleGoogleCallback(
-            code,
-            transaction.code_verifier,
-            transaction.nonce,
-            config
-        );
-    }
-
-    if (provider === "github") {
-        identity = await handleGithubCallback(
-            code,
-            transaction.code_verifier,
-            config
-        );
+    try {
+        if (provider === "google") {
+            identity = await handleGoogleCallback(
+                code,
+                transaction.code_verifier,
+                transaction.nonce,
+                config
+            );
+        } else if (provider === "github") {
+            identity = await handleGithubCallback(
+                code,
+                transaction.code_verifier,
+                config
+            );
+        }
+    } catch (error) {
+        return new Response(error.message, {
+            status: 500,
+            headers: {
+                "Cache-Control": "no-store"
+            }
+        });
     }
 
     if (!identity) {
@@ -222,7 +229,7 @@ async function handleGoogleCallback(
             config.clientId,
             nonce
         );
-    } catch (error) {
+    } catch {
         throw new Error("Google ID token validation failed");
     }
 }
