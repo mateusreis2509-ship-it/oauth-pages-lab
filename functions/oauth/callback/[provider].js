@@ -207,13 +207,13 @@ async function handleGoogleCallback(
     });
 
     if (!response.ok) {
-        return null;
+        throw new Error(`Google token exchange failed: ${response.status}`);
     }
 
     const tokenResponse = await response.json();
 
     if (!tokenResponse.id_token) {
-        return null;
+        throw new Error("Google did not return an id_token");
     }
 
     try {
@@ -222,8 +222,8 @@ async function handleGoogleCallback(
             config.clientId,
             nonce
         );
-    } catch {
-        return null;
+    } catch (error) {
+        throw new Error("Google ID token validation failed");
     }
 }
 
