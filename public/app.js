@@ -1,4 +1,4 @@
-fetch("/api/me", {
+fetch('/api/me', {
     credentials: "same-origin"
 })
     .then((response) => {
