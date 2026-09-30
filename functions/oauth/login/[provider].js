@@ -3,7 +3,7 @@ import { oauthTransactionCookie } from "../../_shared/cookies.js";
 import { getProviderConfig } from "../../_shared/providers.js";
 
 export async function onRequestGet(context) {
-    const { request, env, params } = context;
+    const { env, params } = context;
     const provider = params.provider;
 
     if (provider !== "google" && provider !== "github") {
@@ -64,8 +64,6 @@ export async function onRequestGet(context) {
             expiresAt
         )
         .run();
-
-    const url = new URL(request.url);
 
     const authUrl = new URL(
         provider === "google"
