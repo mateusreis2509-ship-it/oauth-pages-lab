@@ -1,14 +1,11 @@
-fetch('/api', {
+JavaScript
+fetch('/api/me', {
     credentials: "same-origin"
 })
     .then((response) => {
-        const contentType = response.headers.get("content-type");
-        
-        // Só tenta ler JSON se a resposta for OK e o tipo for JSON
-        if (response.ok && contentType && contentType.includes("application/json")) {
+        if (response.ok) {
             return response.json();
         }
-
         return null;
     })
     .then((user) => {
@@ -23,16 +20,3 @@ fetch('/api', {
     .catch((err) => {
         console.error("Erro ao verificar sessão:", err);
     });
-    export async function onRequest(context) {
-    const { request, env } = context;
-
-    // 1. Sua lógica existente que lê o cookie ou busca o usuário no D1:
-    // const user = await obterUsuarioDaSessao(request, env);
-
-    // 2. AQUI NO FINAL entram as linhas do Response.json:
-    if (user) {
-        return Response.json(user);
-    }
-
-    return Response.json({ loggedIn: false }, { status: 401 });
-}
