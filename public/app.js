@@ -1,22 +1,12 @@
-
-fetch('/api/me', {
-    credentials: "same-origin"
-})
-    .then((response) => {
-        if (response.ok) {
-            return response.json();
-        }
-        return null;
-    })
-    .then((user) => {
-        const status = document.getElementById("status");
-
-        if (user) {
-            status.textContent = `Sessão de ${user.email ?? user.displayName}.`;
-        } else {
-            status.textContent = "Nenhuma sessão neste navegador.";
+fetch('/api/me')
+    .then(res => res.json())
+    .then(data => {
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+            statusEl.textContent = "COOKIE: " + data.cookieRecebido + " | BANCO D1: " + data.temBancoD1;
         }
     })
-    .catch((err) => {
-        console.error("Erro ao verificar sessão:", err);
+    .catch(err => {
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.textContent = "Erro ao carregar: " + err;
     });
