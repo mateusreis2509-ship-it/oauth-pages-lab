@@ -1,20 +1,37 @@
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // 1. Obtém os cookies enviados pelo navegador
-    const cookieHeader = request.headers.get('Cookie') || '';
+    // 1. Extrai todos os cookies enviados pelo navegador
+    const cookieHeader = request.headers.get("Cookie") || "";
+    const cookies = Object.fromEntries(
+        cookieHeader.split(';').map(c => {
+            const [key, ...val] = c.trim().split('=');
+            return [key, val.join('=')];
+        })
+    );
 
-    // 2. Extrai o valor do cookie de sessão (ex: __Host-session ou semelhante)
-    // Se utilizar uma base de dados (D1/KV), procure a sessão usando este token:
-    // const sessionToken = parseCookie(cookieHeader);
-    // const user = await env.DB.prepare("SELECT * FROM users WHERE session = ?").bind(sessionToken).first();
+    // 2. Obtém o token do cookie (procura por __Host-session ou session)
+    const sessionToken = cookies['__Host-session'] || cookies['session'];
 
-    // EXEMPLO: Se já tiver a sua função/lógica de validação de sessão, chame-a passando o request:
-    const user = await obterUsuarioPorCookie(cookieHeader, env);
-
-    if (user) {
-        return Response.json(user);
+    if (!sessionToken) {
+        return Response.json({ loggedIn: false }, { status: 401 });
     }
 
+    try {
+        // 3. Consulta a base de dados D1 para encontrar o utilizador associado à sessão
+        if (env.DB) {
+            const user = await env.DB.prepare(
+                "SELECT users.* FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.id = ?"
+            ).bind(sessionToken).first();
+
+            if (user) {
+                return Response.json(user);
+            }
+        }
+    } catch (error) {
+        console.error("Erro ao validar sessão no D1:", error);
+    }
+
+    // Se a sessão não existir ou tiver expirado na base de dados
     return Response.json({ loggedIn: false }, { status: 401 });
 }
