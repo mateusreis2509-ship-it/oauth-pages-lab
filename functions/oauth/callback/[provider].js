@@ -1,6 +1,16 @@
-import { getCookie, sessionCookie, clearOAuthTransactionCookie } from "../../_shared/cookies.js";
-import { sha256Base64Url, randomBase64Url } from "../../_shared/crypto.js";
+import {
+    getCookie,
+    sessionCookie,
+    clearOAuthTransactionCookie
+} from "../../_shared/cookies.js";
+
+import {
+    sha256Base64Url,
+    randomBase64Url
+} from "../../_shared/crypto.js";
+
 import { getProviderConfig } from "../../_shared/providers.js";
+
 import { validateGoogleIdToken } from "../../_shared/oidc.js";
 
 function unauthorized() {
@@ -25,10 +35,7 @@ export async function onRequestGet(context) {
     const { request, env, params } = context;
     const provider = params.provider;
 
-   
-
     const url = new URL(request.url);
-
     const error = url.searchParams.get("error");
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
@@ -43,7 +50,8 @@ export async function onRequestGet(context) {
         return unauthorized();
     }
 
-    const transactionIdHash = await sha256Base64Url(transactionCookie);
+    const transactionIdHash =
+        await sha256Base64Url(transactionCookie);
 
     const now = Math.floor(Date.now() / 1000);
 
@@ -126,7 +134,8 @@ export async function onRequestGet(context) {
     }
 
     const sessionValue = randomBase64Url(32);
-    const sessionIdHash = await sha256Base64Url(sessionValue);
+    const sessionIdHash =
+        await sha256Base64Url(sessionValue);
 
     const sessionExpiresAt = now + 28800;
 
@@ -207,17 +216,19 @@ async function handleGoogleCallback(
     });
 
     if (!response.ok) {
-         const errorBody = await response.text();
-
+        const errorBody = await response.text();
 
         throw new Error(
-            `Google token exchange failed: ${response.status} ${errorBody}`);
+            `Google token exchange failed: ${response.status} ${errorBody}`
+        );
     }
 
     const tokenResponse = await response.json();
 
     if (!tokenResponse.id_token) {
-        throw new Error("Google did not return an id_token");
+        throw new Error(
+            "Google did not return an id_token"
+        );
     }
 
     try {
@@ -227,7 +238,9 @@ async function handleGoogleCallback(
             nonce
         );
     } catch {
-        throw new Error("Google ID token validation failed");
+        throw new Error(
+            "Google ID token validation failed"
+        );
     }
 }
 
@@ -275,15 +288,16 @@ async function handleGithubCallback(
             headers: {
                 "Authorization": `Bearer ${accessToken}`,
                 "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2026-03-10"
+                "X-GitHub-Api-Version": "2026-03-10",
+                "User-Agent": "oauth-pages-lab"
             }
         }
     );
 
     if (!userResponse.ok) {
-         throw new Error(
-        `GitHub profile request failed: ${userResponse.status}`
-    );
+        throw new Error(
+            `GitHub profile request failed: ${userResponse.status}`
+        );
     }
 
     const githubUser = await userResponse.json();
@@ -300,7 +314,6 @@ async function handleGithubCallback(
         `${config.clientId}:${config.clientSecret}`
     );
 
-
     const revokeResponse = await fetch(
         `https://api.github.com/applications/${config.clientId}/grant`,
         {
@@ -309,16 +322,17 @@ async function handleGithubCallback(
                 "Authorization": `Basic ${basicCredentials}`,
                 "Accept": "application/vnd.github+json",
                 "X-GitHub-Api-Version": "2026-03-10",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent": "oauth-pages-lab"
             },
             body: revokeBody
         }
     );
 
     if (revokeResponse.status !== 204) {
-          throw new Error(
-        `GitHub revoke failed: ${revokeResponse.status}`
-    );
+        throw new Error(
+            `GitHub revoke failed: ${revokeResponse.status}`
+        );
     }
 
     return {
