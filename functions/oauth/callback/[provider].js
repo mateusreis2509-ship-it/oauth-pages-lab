@@ -281,7 +281,9 @@ async function handleGithubCallback(
     );
 
     if (!userResponse.ok) {
-        return null;
+         throw new Error(
+        `GitHub profile request failed: ${userResponse.status}`
+    );
     }
 
     const githubUser = await userResponse.json();
@@ -314,7 +316,9 @@ async function handleGithubCallback(
     );
 
     if (revokeResponse.status !== 204) {
-        return null;
+          throw new Error(
+        `GitHub revoke failed: ${revokeResponse.status}`
+    );
     }
 
     return {
